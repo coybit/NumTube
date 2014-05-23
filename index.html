@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+
+    <script src="jQuery-2.0.2-js.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="dist/css/bootstrap-theme.css">
+    <script src="dist/js/bootstrap.min.js"></script>
+    <script src="moment-min.js"></script>
+
+    <style>
+        body {
+            font-family: "Roboto", cursive;
+            background-color: #f1f1f1;
+        }
+        .userInput {
+            text-align: center;
+        }
+
+        #videoTitle {
+            font-size: 1.5em;
+            margin: 1em 0;
+            text-align: center;
+        }
+
+        .stat-box {
+            text-align: center;
+            margin: 0.5em 0;
+            font-size: 1.3em;
+            padding: 1em;
+            border-radius: 4px;
+            box-shadow: 1px 1px 5px rgb(167, 167, 167);
+        }
+
+        .stat-box.total {
+            text-align: center;
+            margin: 0.5em 0;
+            font-size: 1.3em;
+            background-color: rgb(255, 211, 131);
+        }
+
+        .stat-box.views {
+            background-color: #94bef5;;
+        }
+
+        .stat-box.dislikes {
+            background-color: rgb(216, 105, 105);
+        }
+
+        .stat-box.likes {
+            background-color: rgb(109, 187, 109);
+        }
+
+        #videoDislikes, #videoLikes {
+            font-size: 2em;
+        }
+
+        #currentViewsSpeed,
+        #totalViewsSpeed,
+        #totalViews {
+            font-size: 2.5em;
+        }
+
+        .thumbnail-box {
+            text-align: center;
+        }
+
+        .stat-box label, #totalViewsTime, #nowViewsTime{
+            color: #949494;
+        }
+
+        input {
+            border-radius: 4px;
+            border: none;
+            background-color: #e1e1e1;
+            padding: 0.5em;
+            width: 200px;
+            vertical-align: middle;
+        }
+    </style>
+    <script>
+        function getNewPoint(callback) {
+            $.get('https://gdata.youtube.com/feeds/api/videos/' + videoID + '?v=2&alt=json').done( function(res) {
+                var point = {
+                    time: new Date(),
+                    views: res.entry.yt$statistics.viewCount
+                };
+
+                publishedDate = new Date(res.entry.published.$t);
+                thumbnailURL = res.entry.media$group.media$thumbnail[2].url;
+
+                var views = parseInt(point.views);
+
+                $('#videoDislikes').text(res.entry.yt$rating.numDislikes);
+                $('#videoLikes').text(res.entry.yt$rating.numLikes);
+                $('#videoTitle').text(res.entry.title.$t);
+                $('#totalViews').text(views.toLocaleString());
+                $('#totalViewsTime').text( (new moment(publishedDate)).from() );
+                $('#nowViewsTime').text( (new moment(point.time)).from() );
+                callback(point);
+            });
+        }
+
+        var lastPoint = null;
+        var sprint = 10000;
+        var videoID = 'n_6p-1J551Y'
+        var publishedDate;
+        var thumbnailURL;
+
+        function timer() {
+            getNewPoint( function(newPoint)  {
+                if( lastPoint ) {
+
+                    var tDiff = new Date(newPoint.time-lastPoint.time).getSeconds();
+                    var vDiff = newPoint.views - lastPoint.viws;
+                    var ttDiff = (newPoint.time-publishedDate)/1000;
+
+                    $('#currentViewsSpeed').text( Math.round(vDiff/tDiff) );
+                    $('#totalViewsSpeed').text( Math.round(newPoint.views/ttDiff) );
+                    $('#thumbnail').attr('src',thumbnailURL);
+                    $('#videoLink').attr('href','https://www.youtube.com/watch?v=' + videoID);
+                }
+                lastPoint = newPoint;
+                setTimeout(timer,sprint)
+            });
+
+        }
+        $( function() {
+            $('#changeVideoID').click( function() {
+                videoID = $('#videoID').val();
+            });
+            timer();
+        });
+    </script>
+</head>
+<body>
+
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">NumTube</a>
+        </div>
+    </div><!-- /.container-fluid -->
+</nav>
+
+<div class="container" style="margin-top: 3em">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="userInput">
+                Video ID:<input type='text' placeholder='example: n_6p-1J551Y' id='videoID'>
+                <button id='changeVideoID' class="btn btn-warning">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div id='videoTitle'></div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="thumbnail-box">
+                <a id="videoLink" target="_blank">
+                <img id="thumbnail">
+                    </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="stat-box total">
+                <div id="totalViews"></div>
+                <i class="glyphicon glyphicon-eye-open"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="stat-box views">
+                <span class="glyphicon glyphicon-signal"></span>
+                <div>Now</div>
+                <div id="currentViewsSpeed"></div>
+                <div>view/sec</div>
+                <div id="nowViewsTime"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="stat-box views">
+                <span class="glyphicon glyphicon-signal"></span>
+                <div>Average</div>
+                <div id="totalViewsSpeed"></div>
+                <div>view/sec</div>
+                <div id="totalViewsTime"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="stat-box dislikes">
+                <div id="videoDislikes"></div>
+                <i class="glyphicon glyphicon-thumbs-down"></i>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="stat-box likes">
+                <div id="videoLikes"></div>
+                <i class="glyphicon glyphicon-thumbs-up"></i>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
