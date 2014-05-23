@@ -106,22 +106,29 @@
         var lastPoint = null;
         var sprint = 60000;
         var videoID = 'n_6p-1J551Y';
+
         var publishedDate;
         var thumbnailURL;
 
         function timer() {
             getNewPoint( function(newPoint)  {
-                if( lastPoint ) {
 
+                var ttDiff = (newPoint.time-publishedDate)/1000;
+
+                $('#totalViewsSpeed').text( Math.round(newPoint.views/ttDiff) );
+                $('#thumbnail').attr('src',thumbnailURL);
+                $('#videoLink').attr('href','https://www.youtube.com/watch?v=' + videoID);
+
+                if( lastPoint ) {
                     var tDiff = new Date(newPoint.time-lastPoint.time).getSeconds();
                     var vDiff = newPoint.views - lastPoint.views;
-                    var ttDiff = (newPoint.time-publishedDate)/1000;
 
                     $('#currentViewsSpeed').text( Math.round(vDiff/tDiff) );
-                    $('#totalViewsSpeed').text( Math.round(newPoint.views/ttDiff) );
-                    $('#thumbnail').attr('src',thumbnailURL);
-                    $('#videoLink').attr('href','https://www.youtube.com/watch?v=' + videoID);
                 }
+                else
+                    $('#currentViewsSpeed').text( Math.round(newPoint.views/ttDiff));
+
+
                 lastPoint = newPoint;
                 setTimeout(timer,sprint)
             });
