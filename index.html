@@ -41,6 +41,10 @@
             background-color: rgb(255, 211, 131);
         }
 
+        .stat-box.cool {
+            background-color: #999d46;
+        }
+
         .stat-box.views {
             background-color: #94bef5;;
         }
@@ -57,7 +61,7 @@
             font-size: 2em;
         }
 
-        #currentViewsSpeed,
+        #cool-state-1-times,
         #totalViewsSpeed,
         #totalViews {
             font-size: 2.5em;
@@ -81,6 +85,10 @@
         }
     </style>
     <script>
+        var samples = [
+            { work:'make Effele Tower', duration:64000000 }
+                ];
+
         function getNewPoint(callback) {
             $.get('https://gdata.youtube.com/feeds/api/videos/' + videoID + '?v=2&alt=json').done( function(res) {
                 var point = {
@@ -98,7 +106,12 @@
                 $('#videoTitle').text(res.entry.title.$t);
                 $('#totalViews').text(views.toLocaleString());
                 $('#totalViewsTime').text( (new moment(publishedDate)).from() );
-                $('#nowViewsTime').text( (new moment(point.time)).from() );
+
+                // cool stat 1
+                var sampleIdx = 0;
+                var totalSeconds = res.entry.media$group.yt$duration.seconds * res.entry.yt$statistics.viewCount;
+                $('#cool-state-1-times').text( Math.floor(totalSeconds / samples[sampleIdx].duration) );
+                $('#cool-state-1-work').text( samples[sampleIdx].work );
 
                 callback(point);
             });
@@ -199,11 +212,13 @@
 
     <div class="row">
         <div class="col-md-6">
-            <div class="stat-box views">
+            <div class="stat-box cool">
                 <span class="glyphicon glyphicon-signal"></span>
-                <div>Now</div>
-                <div id="currentViewsSpeed"></div>
-                <div>view/sec</div>
+                <div>You can</div>
+                <div id="cool-state-1">
+                    <span id="cool-state-1-times"></span><br/>
+                    times <span id="cool-state-1-work"></span>
+                </div>
             </div>
         </div>
         <div class="col-md-6">
