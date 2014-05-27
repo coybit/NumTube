@@ -26,6 +26,7 @@
         }
 
         .stat-box {
+            position: relative;
             text-align: center;
             margin: 0.5em 0;
             font-size: 1.3em;
@@ -37,7 +38,7 @@
         .stat-box.total {
             text-align: center;
             margin: 0.5em 0;
-            font-size: 1.3em;
+            font-size: 1.1em;
             background-color: rgb(255, 211, 131);
         }
 
@@ -58,13 +59,12 @@
         }
 
         #videoDislikes, #videoLikes {
-            font-size: 2em;
+            font-size: 1.2em;
         }
 
-        #cool-state-1-times,
-        #totalViewsSpeed,
+        .stat-box .times,
         #totalViews {
-            font-size: 2.5em;
+            font-size: 1.5em;
         }
 
         .thumbnail-box {
@@ -83,10 +83,12 @@
             width: 200px;
             vertical-align: middle;
         }
+
     </style>
     <script>
         var samples = [
-            { work:'make Effele Tower', duration:64000000 }
+            { work:'You could make Effele Tower', duration:64000000 },
+            { work: 'You could make Golden Gate bridge', duration:126144000 }
                 ];
 
         function getNewPoint(callback) {
@@ -108,10 +110,28 @@
                 $('#totalViewsTime').text( (new moment(publishedDate)).from() );
 
                 // cool stat 1
-                var sampleIdx = 0;
                 var totalSeconds = res.entry.media$group.yt$duration.seconds * res.entry.yt$statistics.viewCount;
-                $('#cool-state-1-times').text( Math.floor(totalSeconds / samples[sampleIdx].duration) );
-                $('#cool-state-1-work').text( samples[sampleIdx].work );
+                var watchingTime = '';
+                if( totalSeconds/(60*60*24*365) >= 1 )
+                    watchingTime = Math.floor(totalSeconds/(60*60*24*365))  + ' years';
+                else if( totalSeconds/(60*60*24*31) >= 1 )
+                    watchingTime = Math.floor(totalSeconds/(60*60*24))  + ' months';
+                else if( totalSeconds/(60*60*24) >= 1 )
+                    watchingTime = Math.floor(totalSeconds/(60*60*24))  + ' days';
+                else if( totalSeconds/(60*60) >= 1 )
+                    watchingTime = Math.floor(totalSeconds/(60*60))  + ' hours';
+                else if( totalSeconds/(60) >= 1 )
+                    watchingTime = Math.floor(totalSeconds/60)  + ' minutes';
+                else
+                    watchingTime = Math.floor(totalSeconds)  + ' seconds';
+
+                $('#cool-state-1-times').text( watchingTime );
+                $('#cool-state-1-work').text( 'total time spent for watching this view');
+
+                // cool stat 1
+                var sampleIdx = Math.floor(Math.random() * samples.length) ;
+                $('#cool-state-2-times').text( Math.floor(totalSeconds / samples[sampleIdx].duration)  + ' times ');
+                $('#cool-state-2-work').text( samples[sampleIdx].work );
 
                 callback(point);
             });
@@ -166,6 +186,12 @@
         <div class="navbar-header">
             <a class="navbar-brand" href="#">NumTube</a>
         </div>
+        <div class="navbar-form">
+            <div class="userInput">
+                Video ID:<input type='text' placeholder='example: n_6p-1J551Y' id='videoID'>
+                <button id='changeVideoID' class="btn btn-warning">OK</button>
+            </div>
+        </div>
     </div><!-- /.container-fluid -->
 </nav>
 
@@ -174,71 +200,79 @@
 
     <div class="row">
         <div class="col-md-12">
-            <div class="userInput">
-                Video ID:<input type='text' placeholder='example: n_6p-1J551Y' id='videoID'>
-                <button id='changeVideoID' class="btn btn-warning">OK</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
             <div id='videoTitle'></div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-6">
             <div class="thumbnail-box">
                 <a id="videoLink" target="_blank">
-                <img id="thumbnail">
-                    </a>
+                    <img id="thumbnail">
+                </a>
             </div>
         </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="stat-box total">
-                <i class="glyphicon glyphicon-eye-open"></i>
-
-                <div id="totalViews"></div>
-                <div>
-                    since <span id="totalViewsTime"></span>
+        <div class="col-md-6">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="stat-box total">
+                            <span id="totalViews"></span>
+                            views since <span id="totalViewsTime"></span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col-md-6">
-            <div class="stat-box cool">
-                <span class="glyphicon glyphicon-signal"></span>
-                <div>You can</div>
-                <div id="cool-state-1">
-                    <span id="cool-state-1-times"></span><br/>
-                    times <span id="cool-state-1-work"></span>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="stat-box cool">
+                            <div id="cool-state-1">
+                                <span id="cool-state-1-work"></span>
+                                <div id="cool-state-1-times" class="times"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="stat-box cool">
+                            <div id="cool-state-2">
+                                <span id="cool-state-2-work"></span>
+                                <div id="cool-state-2-times" class="times"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="stat-box views">
-                <span class="glyphicon glyphicon-signal"></span>
-                <div>Average</div>
-                <div id="totalViewsSpeed"></div>
-                <div>view/sec</div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="stat-box cool">
+                            <div id="cool-state-3">
+                                <span id="cool-state-3-work"></span>
+                                <div id="cool-state-3-times" class="times"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="stat-box cool">
+                            <div id="cool-state-4">
+                                <span id="cool-state-4-work"></span>
+                                <div id="cool-state-4-times" class="times"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-3">
             <div class="stat-box dislikes">
                 <div id="videoDislikes"></div>
                 <i class="glyphicon glyphicon-thumbs-down"></i>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-3">
             <div class="stat-box likes">
                 <div id="videoLikes"></div>
                 <i class="glyphicon glyphicon-thumbs-up"></i>
