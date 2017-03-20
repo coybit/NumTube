@@ -1,217 +1,254 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+  <title></title>
 
-    <script src="js/jQuery-2.0.2-js.js"></script>
-    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="dist/css/bootstrap-theme.css">
-    <script src="dist/js/bootstrap.min.js"></script>
-    <script src="js/moment-min.js"></script>
-    <link rel="stylesheet" href="css/numtube.css">
-    <script>
-        var samples = [
-            { work:'You could make Effele Tower', duration:64000000 },
-            { work: 'You could make Golden Gate bridge', duration:126144000 }
-                ];
+  <script src="js/jQuery-2.0.2-js.js"></script>
+  <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="dist/css/bootstrap-theme.css">
+  <script src="dist/js/bootstrap.min.js"></script>
+  <script src="js/moment-min.js"></script>
+  <link rel="stylesheet" href="css/numtube.css">
+  <script>
+  var samples = [
+    { work:'You could make Effele Tower', duration:64000000 },
+    { work: 'You could make Golden Gate bridge', duration:126144000 }
+  ];
 
-        function getNewPoint(callback) {
-            $.get('https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics,snippet&id=' + videoID + '&key=AIzaSyDiCwYTMHxebNefqpcYnKH0IwZiMpf1DYc').done( function(res) {
+  function getNewPoint(callback) {
+    $.get('https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics,snippet&id=' + videoID + '&key=AIzaSyDiCwYTMHxebNefqpcYnKH0IwZiMpf1DYc').done( function(res) {
 
-              var stat = res.items[0].statistics;
-              var snippet = res.items[0].snippet;
+      var stat = res.items[0].statistics;
+      var snippet = res.items[0].snippet;
+      var details = res.items[0].contentDetails;
+      
+      var point = {
+        time: new Date(),
+        views: stat.viewCount
+      };
 
-                var point = {
-                    time: new Date(),
-                    views: stat.viewCount
-                };
+      publishedDate = new Date(snippet.publishedAt);
+      thumbnailURL = snippet.thumbnails.standard.url;
 
-                publishedDate = new Date(snippet.publishedAt);
-                thumbnailURL = snippet.thumbnails.standard.url;
+      var views = parseInt(point.views);
 
-                var views = parseInt(point.views);
+      $('#videoDislikes').text(stat.dislikeCount);
+      $('#videoLikes').text(stat.likeCount);
+      $('#videoTitle').text(snippet.title);
+      $('#totalViews').text(views.toLocaleString());
+      $('#totalViewsTime').text( (new moment(publishedDate)).from() );
 
-                $('#videoDislikes').text(stat.dislikeCount);
-                $('#videoLikes').text(stat.likeCount);
-                $('#videoTitle').text(snippet.title);
-                $('#totalViews').text(views.toLocaleString());
-                $('#totalViewsTime').text( (new moment(publishedDate)).from() );
+      // cool stat 1
+      var totalSeconds = convertDurationToSeconds(details.duration) * res.entry.yt$statistics.viewCount;
+      var watchingTime = '';
+      if( totalSeconds/(60*60*24*365) >= 1 )
+      watchingTime = Math.floor(totalSeconds/(60*60*24*365))  + ' years';
+      else if( totalSeconds/(60*60*24*31) >= 1 )
+      watchingTime = Math.floor(totalSeconds/(60*60*24))  + ' months';
+      else if( totalSeconds/(60*60*24) >= 1 )
+      watchingTime = Math.floor(totalSeconds/(60*60*24))  + ' days';
+      else if( totalSeconds/(60*60) >= 1 )
+      watchingTime = Math.floor(totalSeconds/(60*60))  + ' hours';
+      else if( totalSeconds/(60) >= 1 )
+      watchingTime = Math.floor(totalSeconds/60)  + ' minutes';
+      else
+      watchingTime = Math.floor(totalSeconds)  + ' seconds';
 
-                // cool stat 1
-                var totalSeconds = res.entry.media$group.yt$duration.seconds * res.entry.yt$statistics.viewCount;
-                var watchingTime = '';
-                if( totalSeconds/(60*60*24*365) >= 1 )
-                    watchingTime = Math.floor(totalSeconds/(60*60*24*365))  + ' years';
-                else if( totalSeconds/(60*60*24*31) >= 1 )
-                    watchingTime = Math.floor(totalSeconds/(60*60*24))  + ' months';
-                else if( totalSeconds/(60*60*24) >= 1 )
-                    watchingTime = Math.floor(totalSeconds/(60*60*24))  + ' days';
-                else if( totalSeconds/(60*60) >= 1 )
-                    watchingTime = Math.floor(totalSeconds/(60*60))  + ' hours';
-                else if( totalSeconds/(60) >= 1 )
-                    watchingTime = Math.floor(totalSeconds/60)  + ' minutes';
-                else
-                    watchingTime = Math.floor(totalSeconds)  + ' seconds';
+      $('#cool-state-1-times').text( watchingTime );
+      $('#cool-state-1-work').text( 'the total time that is spent for watching this video is');
 
-                $('#cool-state-1-times').text( watchingTime );
-                $('#cool-state-1-work').text( 'the total time that is spent for watching this video is');
+      // cool stat 1
+      var sampleIdx = Math.floor(Math.random() * samples.length) ;
+      $('#cool-state-2-times').text( Math.floor(totalSeconds / samples[sampleIdx].duration)  + ' times ');
+      $('#cool-state-2-work').text( samples[sampleIdx].work );
 
-                // cool stat 1
-                var sampleIdx = Math.floor(Math.random() * samples.length) ;
-                $('#cool-state-2-times').text( Math.floor(totalSeconds / samples[sampleIdx].duration)  + ' times ');
-                $('#cool-state-2-work').text( samples[sampleIdx].work );
+      callback(point);
+    });
+  }
 
-                callback(point);
-            });
-        }
+  var hash = (document.location.hash||'#').replace('#','');
+  var lastPoint = null;
+  var sprint = 60000;
+  var videoID = hash || 'n_6p-1J551Y';
+  var publishedDate;
+  var thumbnailURL;
 
-        var hash = (document.location.hash||'#').replace('#','');
-        var lastPoint = null;
-        var sprint = 60000;
-        var videoID = hash || 'n_6p-1J551Y';
-        var publishedDate;
-        var thumbnailURL;
+  function timer() {
+    getNewPoint( function(newPoint)  {
 
-        function timer() {
-            getNewPoint( function(newPoint)  {
+      var ttDiff = (newPoint.time-publishedDate)/1000;
 
-                var ttDiff = (newPoint.time-publishedDate)/1000;
+      $('#totalViewsSpeed').text( Math.round(newPoint.views/ttDiff) );
+      $('#thumbnail').attr('src',thumbnailURL);
+      $('#videoLink').attr('href','https://www.youtube.com/watch?v=' + videoID);
 
-                $('#totalViewsSpeed').text( Math.round(newPoint.views/ttDiff) );
-                $('#thumbnail').attr('src',thumbnailURL);
-                $('#videoLink').attr('href','https://www.youtube.com/watch?v=' + videoID);
+      if( lastPoint ) {
+        var tDiff = new Date(newPoint.time-lastPoint.time).getSeconds();
+        var vDiff = newPoint.views - lastPoint.views;
+        var ttDiff = (newPoint.time-publishedDate)/1000;
 
-                if( lastPoint ) {
-                    var tDiff = new Date(newPoint.time-lastPoint.time).getSeconds();
-                    var vDiff = newPoint.views - lastPoint.views;
-                    var ttDiff = (newPoint.time-publishedDate)/1000;
-
-                    $('#currentViewsSpeed').text( Math.round(vDiff/tDiff) );
-                }
-                else
-                    $('#currentViewsSpeed').text( Math.round(newPoint.views/ttDiff));
+        $('#currentViewsSpeed').text( Math.round(vDiff/tDiff) );
+      }
+      else
+      $('#currentViewsSpeed').text( Math.round(newPoint.views/ttDiff));
 
 
-                lastPoint = newPoint;
-                timerObj = setTimeout(timer,sprint)
-            });
+      lastPoint = newPoint;
+      timerObj = setTimeout(timer,sprint)
+    });
 
-        }
+  }
 
-        $( function() {
-            $('#changeVideoID').click( function() {
-                clearTimeout(timerObj)
-                timer();
-                videoID = $('#videoID').val();
-            });
-            timer();
-        });
-    </script>
+  function convertDurationToSeconds(duration) {
+    var a = duration.match(/\d+/g);
+
+    if (duration.indexOf('M') >= 0 && duration.indexOf('H') == -1 && duration.indexOf('S') == -1) {
+      a = [0, a[0], 0];
+    }
+
+    if (duration.indexOf('H') >= 0 && duration.indexOf('M') == -1) {
+      a = [a[0], 0, a[1]];
+    }
+    if (duration.indexOf('H') >= 0 && duration.indexOf('M') == -1 && duration.indexOf('S') == -1) {
+      a = [a[0], 0, 0];
+    }
+
+    duration = 0;
+
+    if (a.length == 3) {
+      duration = duration + parseInt(a[0]) * 3600;
+      duration = duration + parseInt(a[1]) * 60;
+      duration = duration + parseInt(a[2]);
+    }
+
+    if (a.length == 2) {
+      duration = duration + parseInt(a[0]) * 60;
+      duration = duration + parseInt(a[1]);
+    }
+
+    if (a.length == 1) {
+      duration = duration + parseInt(a[0]);
+    }
+    var h = Math.floor(duration / 3600);
+    var m = Math.floor(duration % 3600 / 60);
+    var s = Math.floor(duration % 3600 % 60);
+    return h*60*60 + m*60 + s;
+  }
+
+  $( function() {
+    $('#changeVideoID').click( function() {
+      clearTimeout(timerObj)
+      timer();
+      videoID = $('#videoID').val();
+    });
+    timer();
+  });
+  </script>
 </head>
 <body>
 
-<nav class="navbar navbar-default" role="navigation">
+  <nav class="navbar navbar-default" role="navigation">
     <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header">
-            <a class="navbar-brand" href="#">NumTube</a>
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">NumTube</a>
+      </div>
+      <div class="navbar-form">
+        <div class="userInput">
+          Video ID:<input type='text' placeholder='example: n_6p-1J551Y' id='videoID'>
+          <button id='changeVideoID' class="btn btn-warning">OK</button>
         </div>
-        <div class="navbar-form">
-            <div class="userInput">
-                Video ID:<input type='text' placeholder='example: n_6p-1J551Y' id='videoID'>
-                <button id='changeVideoID' class="btn btn-warning">OK</button>
-            </div>
-        </div>
+      </div>
     </div><!-- /.container-fluid -->
-</nav>
+  </nav>
 
-<div class="container" style="margin-top: 3em">
+  <div class="container" style="margin-top: 3em">
     <a href="https://github.com/coybit/NumTube"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
 
     <div class="row">
-        <div class="col-md-12">
-            <div id='videoTitle'></div>
-        </div>
+      <div class="col-md-12">
+        <div id='videoTitle'></div>
+      </div>
     </div>
 
     <div class="row">
-        <div class="col-md-6">
-            <div class="thumbnail-box">
-                <a id="videoLink" target="_blank">
-                    <img id="thumbnail">
-                </a>
-            </div>
+      <div class="col-md-6">
+        <div class="thumbnail-box">
+          <a id="videoLink" target="_blank">
+            <img id="thumbnail">
+          </a>
         </div>
-        <div class="col-md-6">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="stat-box total">
-                            <span id="totalViews"></span>
-                            views since <span id="totalViewsTime"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="stat-box cool">
-                            <div id="cool-state-1">
-                                <span id="cool-state-1-work"></span>
-                                <div id="cool-state-1-times" class="times"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="stat-box cool">
-                            <div id="cool-state-2">
-                                <span id="cool-state-2-work"></span>
-                                <div id="cool-state-2-times" class="times"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="stat-box cool">
-                            <div id="cool-state-3">
-                                <span id="cool-state-3-work"></span>
-                                <div id="cool-state-3-times" class="times"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="stat-box cool">
-                            <div id="cool-state-4">
-                                <span id="cool-state-4-work"></span>
-                                <div id="cool-state-4-times" class="times"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
+      </div>
+      <div class="col-md-6">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="stat-box total">
+                <span id="totalViews"></span>
+                views since <span id="totalViewsTime"></span>
+              </div>
             </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="stat-box cool">
+                <div id="cool-state-1">
+                  <span id="cool-state-1-work"></span>
+                  <div id="cool-state-1-times" class="times"></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="stat-box cool">
+                <div id="cool-state-2">
+                  <span id="cool-state-2-work"></span>
+                  <div id="cool-state-2-times" class="times"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="stat-box cool">
+                <div id="cool-state-3">
+                  <span id="cool-state-3-work"></span>
+                  <div id="cool-state-3-times" class="times"></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="stat-box cool">
+                <div id="cool-state-4">
+                  <span id="cool-state-4-work"></span>
+                  <div id="cool-state-4-times" class="times"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
         </div>
+      </div>
     </div>
 
     <div class="row">
-        <div class="col-md-3">
-            <div class="stat-box dislikes">
-                <div id="videoDislikes"></div>
-                <i class="glyphicon glyphicon-thumbs-down"></i>
-            </div>
+      <div class="col-md-3">
+        <div class="stat-box dislikes">
+          <div id="videoDislikes"></div>
+          <i class="glyphicon glyphicon-thumbs-down"></i>
         </div>
-        <div class="col-md-3">
-            <div class="stat-box likes">
-                <div id="videoLikes"></div>
-                <i class="glyphicon glyphicon-thumbs-up"></i>
-            </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-box likes">
+          <div id="videoLikes"></div>
+          <i class="glyphicon glyphicon-thumbs-up"></i>
         </div>
+      </div>
     </div>
 
-</div>
+  </div>
 
 </body>
 </html>
