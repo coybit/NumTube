@@ -13,20 +13,24 @@
 
     <script>
         function getNewPoint(callback) {
-            $.get('https://gdata.youtube.com/feeds/api/videos/' + videoID + '?v=2&alt=json').done( function(res) {
+            $.get('https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics,snippet&id=' + videoID + '&key=AIzaSyDiCwYTMHxebNefqpcYnKH0IwZiMpf1DYc').done( function(res) {
+
+              var stat = res.items[0].statistics;
+              var snippet = res.items[0].snippet;
+
                 var point = {
                     time: new Date(),
-                    views: res.entry.yt$statistics.viewCount
+                    views: stat.viewCount
                 };
 
-                publishedDate = new Date(res.entry.published.$t);
-                thumbnailURL = res.entry.media$group.media$thumbnail[2].url;
+                publishedDate = new Date(snippet.publishedAt);
+                thumbnailURL = snippet.thumbnails.standard.url;
 
                 var views = parseInt(point.views);
 
-                $('#videoDislikes').text(res.entry.yt$rating.numDislikes);
-                $('#videoLikes').text(res.entry.yt$rating.numLikes);
-                $('#videoTitle').text(res.entry.title.$t);
+                $('#videoDislikes').text(stat.dislikeCount);
+                $('#videoLikes').text(stat.likeCount);
+                $('#videoTitle').text(snippet.title);
                 $('#totalViews').text(views.toLocaleString());
                 $('#totalViewsTime').text( (new moment(publishedDate)).from() );
                 $('#nowViewsTime').text( (new moment(point.time)).from() );
@@ -45,7 +49,7 @@
                 if( lastPoint ) {
 
                     var tDiff = new Date(newPoint.time-lastPoint.time).getSeconds();
-                    var vDiff = newPoint.views - lastPoint.viws;
+                    var vDiff = newPoint.views - lastPoint.views;
                     var ttDiff = (newPoint.time-publishedDate)/1000;
 
                     $('#currentViewsSpeed').text( Math.round(vDiff/tDiff) );
