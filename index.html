@@ -3,88 +3,13 @@
 <head>
     <title></title>
 
-    <script src="jQuery-2.0.2-js.js"></script>
+    <script src="js/jQuery-2.0.2-js.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="dist/css/bootstrap-theme.css">
     <script src="dist/js/bootstrap.min.js"></script>
-    <script src="moment-min.js"></script>
-
-    <style>
-        body {
-            font-family: "Roboto", cursive;
-            background-color: #f1f1f1;
-        }
-        .userInput {
-            text-align: center;
-        }
-
-        #videoTitle {
-            font-size: 1.5em;
-            margin: 1em 0;
-            text-align: center;
-        }
-
-        .stat-box {
-            position: relative;
-            text-align: center;
-            margin: 0.5em 0;
-            font-size: 1.3em;
-            padding: 1em;
-            border-radius: 4px;
-            box-shadow: 1px 1px 5px rgb(167, 167, 167);
-        }
-
-        .stat-box.total {
-            text-align: center;
-            margin: 0.5em 0;
-            font-size: 1.1em;
-            background-color: rgb(255, 211, 131);
-        }
-
-        .stat-box.cool {
-            background-color: #999d46;
-        }
-
-        .stat-box.views {
-            background-color: #94bef5;;
-        }
-
-        .stat-box.dislikes {
-            background-color: rgb(216, 105, 105);
-        }
-
-        .stat-box.likes {
-            background-color: rgb(109, 187, 109);
-        }
-
-        #videoDislikes, #videoLikes {
-            font-size: 1.2em;
-        }
-
-        .stat-box .times,
-        #totalViews {
-            font-size: 1.5em;
-        }
-
-        .thumbnail-box {
-            text-align: center;
-        }
-
-        .stat-box label{
-            color: #949494;
-        }
-
-        input {
-            border-radius: 4px;
-            border: none;
-            background-color: #e1e1e1;
-            padding: 0.5em;
-            width: 200px;
-            vertical-align: middle;
-        }
-
-    </style>
+    <script src="js/moment-min.js"></script>
+    <link rel="stylesheet" href="css/numtube.css">
     <script>
         var samples = [
             { work:'You could make Effele Tower', duration:64000000 },
@@ -92,20 +17,24 @@
                 ];
 
         function getNewPoint(callback) {
-            $.get('https://gdata.youtube.com/feeds/api/videos/' + videoID + '?v=2&alt=json').done( function(res) {
+            $.get('https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics,snippet&id=' + videoID + '&key=AIzaSyDiCwYTMHxebNefqpcYnKH0IwZiMpf1DYc').done( function(res) {
+
+              var stat = res.items[0].statistics;
+              var snippet = res.items[0].snippet;
+
                 var point = {
                     time: new Date(),
-                    views: res.entry.yt$statistics.viewCount
+                    views: stat.viewCount
                 };
 
-                publishedDate = new Date(res.entry.published.$t);
-                thumbnailURL = res.entry.media$group.media$thumbnail[2].url;
+                publishedDate = new Date(snippet.publishedAt);
+                thumbnailURL = snippet.thumbnails.standard.url;
 
                 var views = parseInt(point.views);
 
-                $('#videoDislikes').text(res.entry.yt$rating.numDislikes);
-                $('#videoLikes').text(res.entry.yt$rating.numLikes);
-                $('#videoTitle').text(res.entry.title.$t);
+                $('#videoDislikes').text(stat.dislikeCount);
+                $('#videoLikes').text(stat.likeCount);
+                $('#videoTitle').text(snippet.title);
                 $('#totalViews').text(views.toLocaleString());
                 $('#totalViewsTime').text( (new moment(publishedDate)).from() );
 
@@ -156,6 +85,7 @@
                 if( lastPoint ) {
                     var tDiff = new Date(newPoint.time-lastPoint.time).getSeconds();
                     var vDiff = newPoint.views - lastPoint.views;
+                    var ttDiff = (newPoint.time-publishedDate)/1000;
 
                     $('#currentViewsSpeed').text( Math.round(vDiff/tDiff) );
                 }
@@ -168,6 +98,7 @@
             });
 
         }
+
         $( function() {
             $('#changeVideoID').click( function() {
                 clearTimeout(timerObj)
