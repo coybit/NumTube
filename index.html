@@ -22,7 +22,7 @@
       var stat = res.items[0].statistics;
       var snippet = res.items[0].snippet;
       var details = res.items[0].contentDetails;
-      
+
       var point = {
         time: new Date(),
         views: stat.viewCount
@@ -40,7 +40,7 @@
       $('#totalViewsTime').text( (new moment(publishedDate)).from() );
 
       // cool stat 1
-      var totalSeconds = convertDurationToSeconds(details.duration) * res.entry.yt$statistics.viewCount;
+      var totalSeconds = convertDurationToSeconds(details.duration) * point.views;
       var watchingTime = '';
       if( totalSeconds/(60*60*24*365) >= 1 )
       watchingTime = Math.floor(totalSeconds/(60*60*24*365))  + ' years';
