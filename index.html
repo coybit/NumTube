@@ -3,83 +3,14 @@
 <head>
     <title></title>
 
-    <script src="jQuery-2.0.2-js.js"></script>
+    <script src="js/jQuery-2.0.2-js.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="dist/css/bootstrap-theme.css">
     <script src="dist/js/bootstrap.min.js"></script>
-    <script src="moment-min.js"></script>
+    <script src="js/moment-min.js"></script>
+    <link rel="stylesheet" href="css/numtube.css">
 
-    <style>
-        body {
-            font-family: "Roboto", cursive;
-            background-color: #f1f1f1;
-        }
-        .userInput {
-            text-align: center;
-        }
-
-        #videoTitle {
-            font-size: 1.5em;
-            margin: 1em 0;
-            text-align: center;
-        }
-
-        .stat-box {
-            text-align: center;
-            margin: 0.5em 0;
-            font-size: 1.3em;
-            padding: 1em;
-            border-radius: 4px;
-            box-shadow: 1px 1px 5px rgb(167, 167, 167);
-        }
-
-        .stat-box.total {
-            text-align: center;
-            margin: 0.5em 0;
-            font-size: 1.3em;
-            background-color: rgb(255, 211, 131);
-        }
-
-        .stat-box.views {
-            background-color: #94bef5;;
-        }
-
-        .stat-box.dislikes {
-            background-color: rgb(216, 105, 105);
-        }
-
-        .stat-box.likes {
-            background-color: rgb(109, 187, 109);
-        }
-
-        #videoDislikes, #videoLikes {
-            font-size: 2em;
-        }
-
-        #currentViewsSpeed,
-        #totalViewsSpeed,
-        #totalViews {
-            font-size: 2.5em;
-        }
-
-        .thumbnail-box {
-            text-align: center;
-        }
-
-        .stat-box label, #totalViewsTime, #nowViewsTime{
-            color: #949494;
-        }
-
-        input {
-            border-radius: 4px;
-            border: none;
-            background-color: #e1e1e1;
-            padding: 0.5em;
-            width: 200px;
-            vertical-align: middle;
-        }
-    </style>
     <script>
         function getNewPoint(callback) {
             $.get('https://gdata.youtube.com/feeds/api/videos/' + videoID + '?v=2&alt=json').done( function(res) {
@@ -127,6 +58,7 @@
             });
 
         }
+
         $( function() {
             $('#changeVideoID').click( function() {
                 videoID = $('#videoID').val();
